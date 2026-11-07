@@ -68,3 +68,25 @@ Se simplificó la firma del método y se mejoró la organización de los datos n
 Se ejecutó `.\gradlew.bat clean test`.
 
 Resultado: BUILD SUCCESSFUL. Las siete pruebas automatizadas finalizaron correctamente.
+
+
+
+## Refactoring 4: Extracción de las validaciones
+
+**Técnica aplicada:** Extract Method.
+
+**Problema detectado:**
+
+El método `registrarSolicitud()` concentraba la validación de todos los datos junto con la creación y el almacenamiento de la solicitud. Esto aumentaba su extensión y dificultaba identificar cada responsabilidad.
+
+**Cambio realizado:**
+
+Se extrajo la validación a un nuevo método privado llamado `validarDatosSolicitud()`. Este método comprueba los datos recibidos antes de permitir el registro.
+
+**Resultado:**
+
+Se separaron las responsabilidades de validación y registro. El método principal quedó más breve y fácil de comprender.
+
+**Verificación:**
+
+Se ejecutaron las pruebas automatizadas mediante `.\gradlew.bat clean test` para comprobar que el cambio conservara el comportamiento esperado.

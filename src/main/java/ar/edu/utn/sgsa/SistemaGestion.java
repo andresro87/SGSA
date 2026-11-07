@@ -28,10 +28,8 @@ public class SistemaGestion {
 
     public Solicitud registrarSolicitud(DatosSolicitud datos) {
 
-        if (datos == null) {
-            throw new IllegalArgumentException(
-                    "Los datos de la solicitud son obligatorios."
-            );
+        if (!validarDatosSolicitud(datos)) {
+            return null;
         }
 
         String nombre = datos.getNombre();
@@ -41,34 +39,6 @@ public class SistemaGestion {
         int prioridad = datos.getPrioridad();
         String descripcion = datos.getDescripcion();
 
-        if (nombre == null || nombre.isBlank()) {
-            System.out.println("Error: el nombre es obligatorio.");
-            return null;
-        }
-
-        if (legajo == null || legajo.isBlank()) {
-            throw new IllegalArgumentException("El legajo es obligatorio.");
-        }
-
-        if (email == null || email.isBlank()) {
-            throw new IllegalArgumentException("El email es obligatorio.");
-        }
-
-        if (tipo == null || tipo.isBlank()) {
-            throw new IllegalArgumentException("El tipo es obligatorio.");
-        }
-
-        if (prioridad < 1 || prioridad > 5) {
-            throw new IllegalArgumentException(
-                    "La prioridad debe estar entre 1 y 5."
-            );
-        }
-
-        if (descripcion == null || descripcion.isBlank()) {
-            throw new IllegalArgumentException(
-                    "La descripción es obligatoria."
-            );
-        }
 
         Estudiante estudiante = new Estudiante(nombre, legajo, email);
 
@@ -90,7 +60,47 @@ public class SistemaGestion {
 
         return solicitud;
     }
+    private boolean validarDatosSolicitud(DatosSolicitud datos) {
 
+        if (datos == null) {
+            throw new IllegalArgumentException(
+                    "Los datos de la solicitud son obligatorios."
+            );
+        }
+
+        if (datos.getNombre() == null || datos.getNombre().isBlank()) {
+            System.out.println("Error: el nombre es obligatorio.");
+            return false;
+        }
+
+        if (datos.getLegajo() == null || datos.getLegajo().isBlank()) {
+            throw new IllegalArgumentException("El legajo es obligatorio.");
+        }
+
+        if (datos.getEmail() == null || datos.getEmail().isBlank()) {
+            throw new IllegalArgumentException("El email es obligatorio.");
+        }
+
+        if (datos.getTipo() == null || datos.getTipo().isBlank()) {
+            throw new IllegalArgumentException("El tipo es obligatorio.");
+        }
+
+        if (datos.getPrioridad() < 1 || datos.getPrioridad() > 5) {
+            throw new IllegalArgumentException(
+                    "La prioridad debe estar entre 1 y 5."
+            );
+        }
+
+        if (datos.getDescripcion() == null
+                || datos.getDescripcion().isBlank()) {
+            throw new IllegalArgumentException(
+                    "La descripción es obligatoria."
+            );
+        }
+
+        return true;
+    }
+    
     public void cambiarEstado(int id, String nuevoEstado) {
         Solicitud solicitud = buscarPorId(id);
 
