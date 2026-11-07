@@ -203,4 +203,81 @@ class SistemaGestionTest {
                         .get(0).getEstudiante().getNombre()
         );
     }
+    @Test
+    void noDebeRegistrarSolicitudConLegajoVacio() {
+        DatosSolicitud datos = new DatosSolicitud(
+                "Juan Pérez",
+                "",
+                "juan@email.com",
+                "CERTIFICADO",
+                3,
+                "Solicito certificado de alumno regular"
+        );
+
+        assertThrows(IllegalArgumentException.class,
+                () -> sistema.registrarSolicitud(datos));
+    }
+
+    @Test
+    void noDebeRegistrarSolicitudConPrioridadInvalida() {
+        DatosSolicitud prioridadBaja = new DatosSolicitud(
+                "Juan Pérez",
+                "12345",
+                "juan@email.com",
+                "CERTIFICADO",
+                0,
+                "Solicito certificado"
+        );
+
+        DatosSolicitud prioridadAlta = new DatosSolicitud(
+                "Juan Pérez",
+                "12345",
+                "juan@email.com",
+                "CERTIFICADO",
+                6,
+                "Solicito certificado"
+        );
+
+        assertThrows(IllegalArgumentException.class,
+                () -> sistema.registrarSolicitud(prioridadBaja));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> sistema.registrarSolicitud(prioridadAlta));
+    }
+
+    @Test
+    void noDebeAsignarResponsableASolicitudResuelta() {
+        DatosSolicitud datos = new DatosSolicitud(
+                "Juan Pérez",
+                "12345",
+                "juan@email.com",
+                "CERTIFICADO",
+                3,
+                "Solicito certificado"
+        );
+
+        Solicitud solicitud = sistema.registrarSolicitud(datos);
+
+        sistema.cambiarEstado(solicitud.getId(), "EN_PROCESO");
+        sistema.cambiarEstado(solicitud.getId(), "RESUELTA");
+
+        assertThrows(IllegalStateException.class,
+                () -> sistema.asignarResponsable(
+                        solicitud.getId(),
+                        "María Gómez",
+                        "Secretaría"
+                ));
+    }
+
+    @Test
+    void noDebeCambiarEstadoDeSolicitudInexistente() {
+        assertThrows(IllegalArgumentException.class,
+                () -> sistema.cambiarEstado(999, "EN_PROCESO"));
+    }
+
+    @Test
+    void noDebePermitirModificarListaInternaDeSolicitudes() {
+        assertThrows(UnsupportedOperationException.class,
+                () -> sistema.obtenerSolicitudes().clear());
+    }
 }
