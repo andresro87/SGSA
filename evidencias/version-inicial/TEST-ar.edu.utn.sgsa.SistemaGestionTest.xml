@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="ar.edu.utn.sgsa.SistemaGestionTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-07T20:51:22.197Z" hostname="JARVIS" time="0.143">
+  <properties/>
+  <testcase name="debeCambiarEstadoDeNuevaAEnProceso()" classname="ar.edu.utn.sgsa.SistemaGestionTest" time="0.089"/>
+  <testcase name="debeGuardarYRecuperarSolicitudesDesdeJson()" classname="ar.edu.utn.sgsa.SistemaGestionTest" time="0.008"/>
+  <testcase name="noDebePermitirSaltoDeEstadoInvalido()" classname="ar.edu.utn.sgsa.SistemaGestionTest" time="0.004"/>
+  <testcase name="debeAsignarResponsableCorrectamente()" classname="ar.edu.utn.sgsa.SistemaGestionTest" time="0.009"/>
+  <testcase name="noDebeRegistrarSolicitudConNombreVacio()" classname="ar.edu.utn.sgsa.SistemaGestionTest" time="0.003"/>
+  <testcase name="debeFiltrarSolicitudesPorTipoYEstado()" classname="ar.edu.utn.sgsa.SistemaGestionTest" time="0.006"/>
+  <testcase name="debeRegistrarSolicitudCorrectamente()" classname="ar.edu.utn.sgsa.SistemaGestionTest" time="0.005"/>
+  <system-out><![CDATA[Solicitud registrada correctamente. ID: 1
+Estado actualizado correctamente.
+Solicitud registrada correctamente. ID: 1
+Solicitud registrada correctamente. ID: 1
+Error: una solicitud NUEVA solo puede pasar a EN_PROCESO.
+Solicitud registrada correctamente. ID: 1
+Responsable asignado correctamente.
+Error: el nombre es obligatorio.
+Solicitud registrada correctamente. ID: 1
+Solicitud registrada correctamente. ID: 2
+Estado actualizado correctamente.
+Solicitud registrada correctamente. ID: 1
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -3,12 +3,16 @@ package ar.edu.utn.sgsa;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
 
-import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -17,13 +21,20 @@ import java.util.List;
 public class SistemaGestion {
 
     private List<Solicitud> solicitudes;
-    private Gson gson;
-    private String archivo = "data/solicitudes.json";
+    private final Gson gson;
+    private final Path archivo;
     private int siguienteId;
 
     public SistemaGestion() {
         solicitudes = new ArrayList<>();
         gson = new GsonBuilder().setPrettyPrinting().create();
+
+        archivo = Path.of(
+                System.getProperty("user.dir"),
+                "data",
+                "solicitudes.json"
+        );
+
         siguienteId = 1;
         cargarSolicitudes();
     }
@@ -82,7 +93,10 @@ public class SistemaGestion {
 
         guardarSolicitudes();
 
-        System.out.println("Solicitud registrada correctamente. ID: " + solicitud.getId());
+        System.out.println(
+                "Solicitud registrada correctamente. ID: "
+                        + solicitud.getId()
+        );
     }
 
     // CAMBIAR ESTADO
@@ -105,20 +119,28 @@ public class SistemaGestion {
 
         String estadoActual = solicitudEncontrada.getEstado();
 
-        if (estadoActual.equals("RESUELTA") || estadoActual.equals("RECHAZADA")) {
-            System.out.println("Error: la solicitud ya se encuentra en un estado final.");
+        if (estadoActual.equals("RESUELTA")
+                || estadoActual.equals("RECHAZADA")) {
+            System.out.println(
+                    "Error: la solicitud ya se encuentra en un estado final."
+            );
             return;
         }
 
-        if (estadoActual.equals("NUEVA") && !nuevoEstado.equals("EN_PROCESO")) {
-            System.out.println("Error: una solicitud NUEVA solo puede pasar a EN_PROCESO.");
+        if (estadoActual.equals("NUEVA")
+                && !nuevoEstado.equals("EN_PROCESO")) {
+            System.out.println(
+                    "Error: una solicitud NUEVA solo puede pasar a EN_PROCESO."
+            );
             return;
         }
 
         if (estadoActual.equals("EN_PROCESO")
                 && !nuevoEstado.equals("RESUELTA")
                 && !nuevoEstado.equals("RECHAZADA")) {
-            System.out.println("Error: una solicitud EN_PROCESO debe pasar a RESUELTA o RECHAZADA.");
+            System.out.println(
+                    "Error: una solicitud EN_PROCESO debe pasar a RESUELTA o RECHAZADA."
+            );
             return;
         }
 
@@ -130,7 +152,8 @@ public class SistemaGestion {
 
     // ASIGNAR RESPONSABLE
 
-    public void asignarResponsable(int id, String nombreResponsable, String area) {
+    public void asignarResponsable(int id, String nombreResponsable,
+                                   String area) {
 
         for (Solicitud solicitud : solicitudes) {
 
@@ -138,17 +161,25 @@ public class SistemaGestion {
 
                 if (solicitud.getEstado().equals("RESUELTA")
                         || solicitud.getEstado().equals("RECHAZADA")) {
-                    System.out.println("Error: no se puede asignar un responsable a una solicitud finalizada.");
+                    System.out.println(
+                            "Error: no se puede asignar un responsable a una solicitud finalizada."
+                    );
                     return;
                 }
 
-                if (nombreResponsable == null || nombreResponsable.trim().isEmpty()
-                        || area == null || area.trim().isEmpty()) {
-                    System.out.println("Error: debe ingresar el nombre y el área del responsable.");
+                if (nombreResponsable == null
+                        || nombreResponsable.trim().isEmpty()
+                        || area == null
+                        || area.trim().isEmpty()) {
+                    System.out.println(
+                            "Error: debe ingresar el nombre y el área del responsable."
+                    );
                     return;
                 }
 
-                Responsable responsable = new Responsable(nombreResponsable, area);
+                Responsable responsable =
+                        new Responsable(nombreResponsable, area);
+
                 solicitud.setResponsable(responsable);
 
                 guardarSolicitudes();
@@ -163,7 +194,8 @@ public class SistemaGestion {
 
     // BUSCAR Y FILTRAR SOLICITUDES
 
-    public List<Solicitud> buscarSolicitudes(String estado, String tipo, Integer prioridad) {
+    public List<Solicitud> buscarSolicitudes(String estado, String tipo,
+                                             Integer prioridad) {
 
         List<Solicitud> resultado = new ArrayList<>();
 
@@ -211,7 +243,8 @@ public class SistemaGestion {
         }
 
         reporte.append("\n========== REPORTE DE SOLICITUDES ==========\n");
-        reporte.append("Total de solicitudes: ").append(solicitudes.size()).append("\n");
+        reporte.append("Total de solicitudes: ")
+                .append(solicitudes.size()).append("\n");
         reporte.append("Nuevas: ").append(nuevas).append("\n");
         reporte.append("En proceso: ").append(enProceso).append("\n");
         reporte.append("Resueltas: ").append(resueltas).append("\n");
@@ -220,14 +253,19 @@ public class SistemaGestion {
         reporte.append("\nDETALLE ORDENADO POR PRIORIDAD:\n");
 
         List<Solicitud> ordenadas = new ArrayList<>(solicitudes);
-        ordenadas.sort(Comparator.comparingInt(Solicitud::getPrioridad));
+        ordenadas.sort(
+                Comparator.comparingInt(Solicitud::getPrioridad)
+        );
 
         for (Solicitud solicitud : ordenadas) {
             reporte.append("ID: ").append(solicitud.getId())
-                    .append(" | Estudiante: ").append(solicitud.getEstudiante().getNombre())
+                    .append(" | Estudiante: ")
+                    .append(solicitud.getEstudiante().getNombre())
                     .append(" | Tipo: ").append(solicitud.getTipo())
-                    .append(" | Prioridad: ").append(solicitud.getPrioridad())
-                    .append(" | Estado: ").append(solicitud.getEstado())
+                    .append(" | Prioridad: ")
+                    .append(solicitud.getPrioridad())
+                    .append(" | Estado: ")
+                    .append(solicitud.getEstado())
                     .append("\n");
         }
 
@@ -241,41 +279,44 @@ public class SistemaGestion {
     private void guardarSolicitudes() {
 
         try {
-            File carpeta = new File("data");
+            Files.createDirectories(archivo.getParent());
 
-            if (!carpeta.exists()) {
-                carpeta.mkdirs();
+            try (FileWriter writer = new FileWriter(
+                    archivo.toFile(),
+                    StandardCharsets.UTF_8
+            )) {
+                gson.toJson(solicitudes, writer);
             }
 
-            FileWriter writer = new FileWriter(archivo);
-            gson.toJson(solicitudes, writer);
-            writer.close();
-
-        } catch (Exception e) {
-            System.out.println("Error al guardar las solicitudes: " + e.getMessage());
+        } catch (IOException e) {
+            throw new IllegalStateException(
+                    "No se pudieron guardar las solicitudes.",
+                    e
+            );
         }
     }
 
     private void cargarSolicitudes() {
 
-        File file = new File(archivo);
-
-        if (!file.exists()) {
+        if (!Files.exists(archivo)) {
             solicitudes = new ArrayList<>();
+            guardarSolicitudes();
             return;
         }
 
-        try {
-            FileReader reader = new FileReader(file);
+        try (FileReader reader = new FileReader(
+                archivo.toFile(),
+                StandardCharsets.UTF_8
+        )) {
 
-            Type tipoLista = new TypeToken<ArrayList<Solicitud>>() {}.getType();
+            Type tipoLista =
+                    new TypeToken<ArrayList<Solicitud>>() {}.getType();
 
-            solicitudes = gson.fromJson(reader, tipoLista);
-            reader.close();
+            List<Solicitud> datos = gson.fromJson(reader, tipoLista);
 
-            if (solicitudes == null) {
-                solicitudes = new ArrayList<>();
-            }
+            solicitudes = datos != null
+                    ? datos
+                    : new ArrayList<>();
 
             for (Solicitud solicitud : solicitudes) {
                 if (solicitud.getId() >= siguienteId) {
@@ -283,9 +324,12 @@ public class SistemaGestion {
                 }
             }
 
-        } catch (Exception e) {
-            System.out.println("Error al cargar las solicitudes: " + e.getMessage());
-            solicitudes = new ArrayList<>();
+        } catch (IOException | JsonParseException e) {
+            throw new IllegalStateException(
+                    "No se pudieron recuperar las solicitudes. "
+                            + "El archivo JSON no será sobrescrito.",
+                    e
+            );
         }
     }
 
