@@ -12,13 +12,18 @@ repositories {
     mavenCentral()
 }
 
+
 dependencies {
     // Persistencia JSON
     implementation("com.google.code.gson:gson:2.13.1")
 
-    // Pruebas automatizadas
+    // JUnit 5: pruebas automatizadas
     testImplementation("org.junit.jupiter:junit-jupiter:5.12.2")
+
+    // Permite que Gradle ejecute las pruebas con JUnit Platform
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
+
 
 java {
     toolchain {
