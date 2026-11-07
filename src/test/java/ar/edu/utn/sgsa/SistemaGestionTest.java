@@ -1,4 +1,5 @@
 
+
 package ar.edu.utn.sgsa;
 
 import org.junit.jupiter.api.AfterEach;
@@ -27,10 +28,30 @@ class SistemaGestionTest {
         Files.deleteIfExists(archivo);
     }
 
+    private void registrar(
+            String nombre,
+            String legajo,
+            String email,
+            String tipo,
+            int prioridad,
+            String descripcion
+    ) {
+        sistema.registrarSolicitud(
+                new DatosSolicitud(
+                        nombre,
+                        legajo,
+                        email,
+                        tipo,
+                        prioridad,
+                        descripcion
+                )
+        );
+    }
+
     @Test
     void debeRegistrarSolicitudCorrectamente() {
 
-        sistema.registrarSolicitud(
+        registrar(
                 "Juan Perez",
                 "12345",
                 "juan@email.com",
@@ -50,7 +71,7 @@ class SistemaGestionTest {
     @Test
     void noDebeRegistrarSolicitudConNombreVacio() {
 
-        sistema.registrarSolicitud(
+        registrar(
                 "",
                 "12345",
                 "juan@email.com",
@@ -65,7 +86,7 @@ class SistemaGestionTest {
     @Test
     void debeCambiarEstadoDeNuevaAEnProceso() {
 
-        sistema.registrarSolicitud(
+        registrar(
                 "Juan Perez",
                 "12345",
                 "juan@email.com",
@@ -85,7 +106,7 @@ class SistemaGestionTest {
     @Test
     void noDebePermitirSaltoDeEstadoInvalido() {
 
-        sistema.registrarSolicitud(
+        registrar(
                 "Juan Perez",
                 "12345",
                 "juan@email.com",
@@ -105,7 +126,7 @@ class SistemaGestionTest {
     @Test
     void debeAsignarResponsableCorrectamente() {
 
-        sistema.registrarSolicitud(
+        registrar(
                 "Juan Perez",
                 "12345",
                 "juan@email.com",
@@ -131,7 +152,7 @@ class SistemaGestionTest {
     @Test
     void debeFiltrarSolicitudesPorTipoYEstado() {
 
-        sistema.registrarSolicitud(
+        registrar(
                 "Juan Perez",
                 "12345",
                 "juan@email.com",
@@ -140,7 +161,7 @@ class SistemaGestionTest {
                 "Solicito certificado"
         );
 
-        sistema.registrarSolicitud(
+        registrar(
                 "Maria Gomez",
                 "23456",
                 "maria@email.com",
@@ -155,14 +176,16 @@ class SistemaGestionTest {
                 sistema.buscarSolicitudes("NUEVA", "EQUIVALENCIA", null);
 
         assertEquals(1, resultados.size());
-        assertEquals("Maria Gomez",
-                resultados.get(0).getEstudiante().getNombre());
+        assertEquals(
+                "Maria Gomez",
+                resultados.get(0).getEstudiante().getNombre()
+        );
     }
 
     @Test
     void debeGuardarYRecuperarSolicitudesDesdeJson() {
 
-        sistema.registrarSolicitud(
+        registrar(
                 "Juan Perez",
                 "12345",
                 "juan@email.com",

@@ -1,78 +1,73 @@
 
+
+
 package ar.edu.utn.sgsa;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonParseException;
-import com.google.gson.reflect.TypeToken;
-
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.lang.reflect.Type;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
 public class SistemaGestion {
 
-    private List<Solicitud> solicitudes;
-    private final Gson gson;
-    private final Path archivo;
+    private final List<Solicitud> solicitudes;
+    private final JsonSolicitudRepository repositorio;
     private int siguienteId;
 
     public SistemaGestion() {
-        solicitudes = new ArrayList<>();
-        gson = new GsonBuilder().setPrettyPrinting().create();
-
-        archivo = Path.of(
-                System.getProperty("user.dir"),
-                "data",
-                "solicitudes.json"
-        );
+        repositorio = new JsonSolicitudRepository();
+        solicitudes = new ArrayList<>(repositorio.cargar());
 
         siguienteId = 1;
-        cargarSolicitudes();
+
+        for (Solicitud solicitud : solicitudes) {
+            if (solicitud.getId() >= siguienteId) {
+                siguienteId = solicitud.getId() + 1;
+            }
+        }
     }
 
-    // REGISTRAR SOLICITUD
+    public Solicitud registrarSolicitud(DatosSolicitud datos) {
 
-    public void registrarSolicitud(String nombre, String legajo,
-                                   String email, String tipo,
-                                   int prioridad, String descripcion) {
+        if (datos == null) {
+            throw new IllegalArgumentException(
+                    "Los datos de la solicitud son obligatorios."
+            );
+        }
 
-        if (nombre == null || nombre.trim().isEmpty()) {
+        String nombre = datos.getNombre();
+        String legajo = datos.getLegajo();
+        String email = datos.getEmail();
+        String tipo = datos.getTipo();
+        int prioridad = datos.getPrioridad();
+        String descripcion = datos.getDescripcion();
+
+        if (nombre == null || nombre.isBlank()) {
             System.out.println("Error: el nombre es obligatorio.");
-            return;
+            return null;
         }
 
-        if (legajo == null || legajo.trim().isEmpty()) {
-            System.out.println("Error: el legajo es obligatorio.");
-            return;
+        if (legajo == null || legajo.isBlank()) {
+            throw new IllegalArgumentException("El legajo es obligatorio.");
         }
 
-        if (email == null || !email.contains("@")) {
-            System.out.println("Error: el email no es válido.");
-            return;
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException("El email es obligatorio.");
         }
 
-        if (tipo == null || tipo.trim().isEmpty()) {
-            System.out.println("Error: el tipo de solicitud es obligatorio.");
-            return;
+        if (tipo == null || tipo.isBlank()) {
+            throw new IllegalArgumentException("El tipo es obligatorio.");
         }
 
-        if (prioridad < 1 || prioridad > 3) {
-            System.out.println("Error: la prioridad debe ser 1, 2 o 3.");
-            return;
+        if (prioridad < 1 || prioridad > 5) {
+            throw new IllegalArgumentException(
+                    "La prioridad debe estar entre 1 y 5."
+            );
         }
 
-        if (descripcion == null || descripcion.trim().isEmpty()) {
-            System.out.println("Error: la descripción es obligatoria.");
-            return;
+        if (descripcion == null || descripcion.isBlank()) {
+            throw new IllegalArgumentException(
+                    "La descripción es obligatoria."
+            );
         }
 
         Estudiante estudiante = new Estudiante(nombre, legajo, email);
@@ -80,135 +75,110 @@ public class SistemaGestion {
         Solicitud solicitud = new Solicitud(
                 siguienteId,
                 estudiante,
-                tipo.toUpperCase(),
+                tipo,
                 prioridad,
                 descripcion,
                 "NUEVA",
                 null,
-                LocalDate.now().toString()
+                java.time.LocalDateTime.now().toString()
         );
 
         solicitudes.add(solicitud);
         siguienteId++;
 
-        guardarSolicitudes();
+        repositorio.guardar(solicitudes);
 
-        System.out.println(
-                "Solicitud registrada correctamente. ID: "
-                        + solicitud.getId()
-        );
+        return solicitud;
     }
-
-    // CAMBIAR ESTADO
 
     public void cambiarEstado(int id, String nuevoEstado) {
+        Solicitud solicitud = buscarPorId(id);
 
-        Solicitud solicitudEncontrada = null;
-
-        for (Solicitud solicitud : solicitudes) {
-            if (solicitud.getId() == id) {
-                solicitudEncontrada = solicitud;
-                break;
-            }
+        if (nuevoEstado == null || nuevoEstado.isBlank()) {
+            throw new IllegalArgumentException(
+                    "El nuevo estado es obligatorio."
+            );
         }
 
-        if (solicitudEncontrada == null) {
-            System.out.println("Error: no existe una solicitud con ese ID.");
-            return;
-        }
+        String estadoActual = solicitud.getEstado();
 
-        String estadoActual = solicitudEncontrada.getEstado();
+        boolean transicionValida =
+                (estadoActual.equals("NUEVA")
+                        && nuevoEstado.equals("EN_PROCESO"))
+                        ||
+                        (estadoActual.equals("EN_PROCESO")
+                                && (nuevoEstado.equals("RESUELTA")
+                                || nuevoEstado.equals("RECHAZADA")));
 
-        if (estadoActual.equals("RESUELTA")
-                || estadoActual.equals("RECHAZADA")) {
+        if (!transicionValida) {
             System.out.println(
-                    "Error: la solicitud ya se encuentra en un estado final."
+                    "No se permite cambiar de "
+                            + estadoActual + " a " + nuevoEstado + "."
             );
             return;
         }
 
-        if (estadoActual.equals("NUEVA")
-                && !nuevoEstado.equals("EN_PROCESO")) {
-            System.out.println(
-                    "Error: una solicitud NUEVA solo puede pasar a EN_PROCESO."
-            );
-            return;
-        }
-
-        if (estadoActual.equals("EN_PROCESO")
-                && !nuevoEstado.equals("RESUELTA")
-                && !nuevoEstado.equals("RECHAZADA")) {
-            System.out.println(
-                    "Error: una solicitud EN_PROCESO debe pasar a RESUELTA o RECHAZADA."
-            );
-            return;
-        }
-
-        solicitudEncontrada.setEstado(nuevoEstado);
-        guardarSolicitudes();
-
-        System.out.println("Estado actualizado correctamente.");
+        solicitud.setEstado(nuevoEstado);
+        repositorio.guardar(solicitudes);
     }
 
-    // ASIGNAR RESPONSABLE
+    public void asignarResponsable(
+            int id,
+            String nombreResponsable,
+            String area
+    ) {
+        Solicitud solicitud = buscarPorId(id);
 
-    public void asignarResponsable(int id, String nombreResponsable,
-                                   String area) {
-
-        for (Solicitud solicitud : solicitudes) {
-
-            if (solicitud.getId() == id) {
-
-                if (solicitud.getEstado().equals("RESUELTA")
-                        || solicitud.getEstado().equals("RECHAZADA")) {
-                    System.out.println(
-                            "Error: no se puede asignar un responsable a una solicitud finalizada."
-                    );
-                    return;
-                }
-
-                if (nombreResponsable == null
-                        || nombreResponsable.trim().isEmpty()
-                        || area == null
-                        || area.trim().isEmpty()) {
-                    System.out.println(
-                            "Error: debe ingresar el nombre y el área del responsable."
-                    );
-                    return;
-                }
-
-                Responsable responsable =
-                        new Responsable(nombreResponsable, area);
-
-                solicitud.setResponsable(responsable);
-
-                guardarSolicitudes();
-
-                System.out.println("Responsable asignado correctamente.");
-                return;
-            }
+        if (solicitud.getEstado().equals("RESUELTA")
+                || solicitud.getEstado().equals("RECHAZADA")) {
+            throw new IllegalStateException(
+                    "No se puede asignar un responsable "
+                            + "a una solicitud finalizada."
+            );
         }
 
-        System.out.println("Error: no se encontró la solicitud.");
+        if (nombreResponsable == null || nombreResponsable.isBlank()) {
+            throw new IllegalArgumentException(
+                    "El nombre del responsable es obligatorio."
+            );
+        }
+
+        if (area == null || area.isBlank()) {
+            throw new IllegalArgumentException(
+                    "El área del responsable es obligatoria."
+            );
+        }
+
+        Responsable responsable = new Responsable(
+                nombreResponsable,
+                area
+        );
+
+        solicitud.setResponsable(responsable);
+        repositorio.guardar(solicitudes);
     }
 
-    // BUSCAR Y FILTRAR SOLICITUDES
-
-    public List<Solicitud> buscarSolicitudes(String estado, String tipo,
-                                             Integer prioridad) {
-
+    public List<Solicitud> buscarSolicitudes(
+            String estado,
+            String tipo,
+            Integer prioridad
+    ) {
         List<Solicitud> resultado = new ArrayList<>();
 
         for (Solicitud solicitud : solicitudes) {
+            boolean coincideEstado =
+                    estado == null
+                            || estado.isBlank()
+                            || solicitud.getEstado().equals(estado);
 
-            boolean coincideEstado = estado == null
-                    || solicitud.getEstado().equalsIgnoreCase(estado);
+            boolean coincideTipo =
+                    tipo == null
+                            || tipo.isBlank()
+                            || solicitud.getTipo().equals(tipo);
 
-            boolean coincideTipo = tipo == null
-                    || solicitud.getTipo().equalsIgnoreCase(tipo);
-
-            boolean coincidePrioridad = prioridad == null
-                    || solicitud.getPrioridad() == prioridad;
+            boolean coincidePrioridad =
+                    prioridad == null
+                            || solicitud.getPrioridad() == prioridad;
 
             if (coincideEstado && coincideTipo && coincidePrioridad) {
                 resultado.add(solicitud);
@@ -218,124 +188,60 @@ public class SistemaGestion {
         return resultado;
     }
 
-    // GENERAR REPORTE
-
     public String generarReporte() {
-
-        StringBuilder reporte = new StringBuilder();
-
         int nuevas = 0;
         int enProceso = 0;
         int resueltas = 0;
         int rechazadas = 0;
 
         for (Solicitud solicitud : solicitudes) {
-
-            if (solicitud.getEstado().equals("NUEVA")) {
-                nuevas++;
-            } else if (solicitud.getEstado().equals("EN_PROCESO")) {
-                enProceso++;
-            } else if (solicitud.getEstado().equals("RESUELTA")) {
-                resueltas++;
-            } else if (solicitud.getEstado().equals("RECHAZADA")) {
-                rechazadas++;
+            switch (solicitud.getEstado()) {
+                case "NUEVA" -> nuevas++;
+                case "EN_PROCESO" -> enProceso++;
+                case "RESUELTA" -> resueltas++;
+                case "RECHAZADA" -> rechazadas++;
+                default -> {
+                    // No se contabilizan estados desconocidos.
+                }
             }
         }
 
+        List<Solicitud> ordenadas = new ArrayList<>(solicitudes);
+
+        ordenadas.sort(
+                Comparator.comparingInt(Solicitud::getPrioridad)
+        );
+
+        StringBuilder reporte = new StringBuilder();
+
         reporte.append("\n========== REPORTE DE SOLICITUDES ==========\n");
         reporte.append("Total de solicitudes: ")
-                .append(solicitudes.size()).append("\n");
+                .append(solicitudes.size())
+                .append("\n");
         reporte.append("Nuevas: ").append(nuevas).append("\n");
         reporte.append("En proceso: ").append(enProceso).append("\n");
         reporte.append("Resueltas: ").append(resueltas).append("\n");
         reporte.append("Rechazadas: ").append(rechazadas).append("\n");
 
-        reporte.append("\nDETALLE ORDENADO POR PRIORIDAD:\n");
-
-        List<Solicitud> ordenadas = new ArrayList<>(solicitudes);
-        ordenadas.sort(
-                Comparator.comparingInt(Solicitud::getPrioridad)
-        );
+        reporte.append("\n--- Solicitudes ordenadas por prioridad ---\n");
 
         for (Solicitud solicitud : ordenadas) {
-            reporte.append("ID: ").append(solicitud.getId())
-                    .append(" | Estudiante: ")
-                    .append(solicitud.getEstudiante().getNombre())
-                    .append(" | Tipo: ").append(solicitud.getTipo())
-                    .append(" | Prioridad: ")
-                    .append(solicitud.getPrioridad())
-                    .append(" | Estado: ")
-                    .append(solicitud.getEstado())
-                    .append("\n");
+            reporte.append(solicitud).append("\n");
         }
-
-        reporte.append("============================================\n");
 
         return reporte.toString();
     }
 
-    // PERSISTENCIA JSON
-
-    private void guardarSolicitudes() {
-
-        try {
-            Files.createDirectories(archivo.getParent());
-
-            try (FileWriter writer = new FileWriter(
-                    archivo.toFile(),
-                    StandardCharsets.UTF_8
-            )) {
-                gson.toJson(solicitudes, writer);
-            }
-
-        } catch (IOException e) {
-            throw new IllegalStateException(
-                    "No se pudieron guardar las solicitudes.",
-                    e
-            );
-        }
-    }
-
-    private void cargarSolicitudes() {
-
-        if (!Files.exists(archivo)) {
-            solicitudes = new ArrayList<>();
-            guardarSolicitudes();
-            return;
-        }
-
-        try (FileReader reader = new FileReader(
-                archivo.toFile(),
-                StandardCharsets.UTF_8
-        )) {
-
-            Type tipoLista =
-                    new TypeToken<ArrayList<Solicitud>>() {}.getType();
-
-            List<Solicitud> datos = gson.fromJson(reader, tipoLista);
-
-            solicitudes = datos != null
-                    ? datos
-                    : new ArrayList<>();
-
-            for (Solicitud solicitud : solicitudes) {
-                if (solicitud.getId() >= siguienteId) {
-                    siguienteId = solicitud.getId() + 1;
-                }
-            }
-
-        } catch (IOException | JsonParseException e) {
-            throw new IllegalStateException(
-                    "No se pudieron recuperar las solicitudes. "
-                            + "El archivo JSON no será sobrescrito.",
-                    e
-            );
-        }
-    }
-
-    // CONSULTAR TODAS LAS SOLICITUDES
-
     public List<Solicitud> obtenerSolicitudes() {
-        return solicitudes;
+        return List.copyOf(solicitudes);
+    }
+
+    private Solicitud buscarPorId(int id) {
+        return solicitudes.stream()
+                .filter(solicitud -> solicitud.getId() == id)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "No se encontró una solicitud con ID " + id + "."
+                ));
     }
 }
