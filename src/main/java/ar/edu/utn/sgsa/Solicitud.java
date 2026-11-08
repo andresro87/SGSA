@@ -1,4 +1,3 @@
-
 package ar.edu.utn.sgsa;
 
 public class Solicitud {
@@ -16,9 +15,8 @@ public class Solicitud {
     }
 
     public Solicitud(int id, Estudiante estudiante, String tipo,
-                     int prioridad, String descripcion, String estado,
-                     Responsable responsable, String fechaRegistro) {
-
+                    int prioridad, String descripcion, String estado,
+                    Responsable responsable, String fechaRegistro) {
         this.id = id;
         this.estudiante = estudiante;
         this.tipo = tipo;
@@ -27,6 +25,23 @@ public class Solicitud {
         this.estado = estado;
         this.responsable = responsable;
         this.fechaRegistro = fechaRegistro;
+    }
+
+    // Refactoring (Move Method): La entidad valida si la transicion de estado es valida
+    public boolean esTransicionValida(String nuevoEstado) {
+        if (nuevoEstado == null || nuevoEstado.isBlank()) {
+            return false;
+        }
+        if (this.estado.equals(nuevoEstado)) {
+            return true;
+        }
+        return (this.estado.equals("NUEVA") && nuevoEstado.equals("EN_PROCESO"))
+                || (this.estado.equals("EN_PROCESO") && (nuevoEstado.equals("RESUELTA") || nuevoEstado.equals("RECHAZADA")));
+    }
+
+    // Refactoring (Move Method): Encapsula la regla de asignacion de responsable
+    public boolean esFinalizada() {
+        return "RESUELTA".equals(this.estado) || "RECHAZADA".equals(this.estado);
     }
 
     public int getId() {

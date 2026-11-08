@@ -1,4 +1,3 @@
-
 package ar.edu.utn.sgsa;
 
 import com.google.gson.Gson;
@@ -32,7 +31,6 @@ public class JsonSolicitudRepository {
     }
 
     public void guardar(List<Solicitud> solicitudes) {
-
         try {
             Files.createDirectories(archivo.getParent());
 
@@ -42,7 +40,6 @@ public class JsonSolicitudRepository {
             )) {
                 gson.toJson(solicitudes, writer);
             }
-
         } catch (IOException e) {
             throw new IllegalStateException(
                     "No se pudieron guardar las solicitudes.",
@@ -52,7 +49,6 @@ public class JsonSolicitudRepository {
     }
 
     public List<Solicitud> cargar() {
-
         if (!Files.exists(archivo)) {
             List<Solicitud> solicitudes = new ArrayList<>();
             guardar(solicitudes);
@@ -63,23 +59,15 @@ public class JsonSolicitudRepository {
                 archivo.toFile(),
                 StandardCharsets.UTF_8
         )) {
-
-            Type tipoLista =
-                    new TypeToken<ArrayList<Solicitud>>() {}.getType();
-
+            Type tipoLista = new TypeToken<ArrayList<Solicitud>>() {}.getType();
             List<Solicitud> solicitudes = gson.fromJson(reader, tipoLista);
 
-            return solicitudes != null
-                    ? solicitudes
-                    : new ArrayList<>();
-
+            return solicitudes != null ? solicitudes : new ArrayList<>();
         } catch (IOException | JsonParseException e) {
             throw new IllegalStateException(
-                    "No se pudieron recuperar las solicitudes. "
-                            + "El archivo JSON no será sobrescrito.",
+                    "No se pudieron recuperar las solicitudes. El archivo JSON no será sobrescrito.",
                     e
             );
         }
     }
 }
-
