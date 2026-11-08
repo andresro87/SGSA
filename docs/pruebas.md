@@ -1,38 +1,43 @@
-# Etapa de pruebas y verificación
+# Etapa de Pruebas y Verificación – SGSA
 
-## Objetivo
+**Materia:** Metodología de Sistemas II – UTN  
+**Integrantes:** Andrés Rodríguez, Francisco López
 
-Verificar que las modificaciones realizadas durante el proceso de refactoring no hayan alterado el comportamiento esperado del Sistema de Gestión de Solicitudes Académicas (SGSA). También se busca comprobar el funcionamiento de las validaciones incorporadas y la protección de los datos internos.
+---
 
-## Pruebas automatizadas
+## 1. Objetivo
 
-Se utilizaron pruebas unitarias con JUnit 5 para verificar el comportamiento de las operaciones principales del sistema.
+Verificar que las modificaciones realizadas durante el proceso de refactoring no hayan alterado el comportamiento esperado del Sistema de Gestión de Solicitudes Académicas (SGSA), garantizando **regresión cero** y comprobando el correcto funcionamiento de las validaciones y el encapsulamiento.
 
-| N.º | Prueba | Comportamiento verificado |
-|---|---|---|
-| 1 | Registro correcto | Permite registrar una solicitud válida. |
-| 2 | Nombre vacío | Impide registrar una solicitud sin nombre. |
-| 3 | Cambio de estado | Permite pasar de NUEVA a EN_PROCESO. |
-| 4 | Transición inválida | Impide realizar transiciones de estado no permitidas. |
-| 5 | Asignación de responsable | Permite asignar un responsable correctamente. |
-| 6 | Búsqueda y filtrado | Filtra solicitudes según tipo y estado. |
-| 7 | Persistencia JSON | Permite guardar y recuperar solicitudes. |
-| 8 | Legajo vacío | Rechaza solicitudes sin legajo. |
-| 9 | Prioridad inválida | Rechaza prioridades fuera del rango permitido de 1 a 5. |
-| 10 | Solicitud resuelta | Impide asignar un responsable a una solicitud finalizada. |
-| 11 | ID inexistente | Rechaza operaciones sobre solicitudes que no existen. |
-| 12 | Lista inmutable | Impide modificar directamente la colección interna de solicitudes. |
+---
 
-## Resultado de la ejecución
+## 2. Pruebas Automatizadas (JUnit 5)
 
-Se ejecutó la suite completa de pruebas mediante Gradle:
+La suite `SistemaGestionTest` cuenta con 12 pruebas automatizadas que cubren las operaciones del sistema:
 
-`./gradlew.bat clean test`
+| N.º | Caso de Prueba | Comportamiento Verificado | Resultado |
+|---|---|---|---|
+| 1 | Registro correcto | Permite registrar una solicitud válida con datos completos. | Exitoso |
+| 2 | Nombre vacío | Impide registrar una solicitud si el nombre está vacío. | Exitoso |
+| 3 | Cambio de estado | Permite pasar el estado de `NUEVA` a `EN_PROCESO`. | Exitoso |
+| 4 | Transición inválida | Impide realizar saltos de estado no permitidos (ej. `NUEVA` a `RESUELTA`). | Exitoso |
+| 5 | Asignación de responsable | Permite asignar un responsable a una solicitud activa. | Exitoso |
+| 6 | Búsqueda y filtrado | Filtra adecuadamente solicitudes según tipo, estado y prioridad. | Exitoso |
+| 7 | Persistencia JSON | Guarda y recupera solicitudes correctamente en el archivo JSON. | Exitoso |
+| 8 | Legajo vacío | Rechaza el registro si el legajo del estudiante está vacío. | Exitoso |
+| 9 | Prioridad inválida | Rechaza prioridades fuera del rango permitido de 1 a 5. | Exitoso |
+| 10 | Solicitud resuelta | Impide asignar un responsable a una solicitud en estado finalizado. | Exitoso |
+| 11 | ID inexistente | Lanza excepción al intentar operar sobre un ID de solicitud no registrado. | Exitoso |
+| 12 | Lista inmutable | Verifica que `obtenerSolicitudes()` devuelva una lista inmutable (`List.copyOf`). | Exitoso |
 
-**Resultado:** BUILD SUCCESSFUL.
+---
 
-Las 12 pruebas automatizadas finalizaron correctamente.
+## 3. Resultado de la Ejecución
 
-## Conclusión
+Se ejecutó la suite completa mediante Gradle:
 
-Los resultados permiten comprobar que las funcionalidades principales continúan operativas después de los refactorings. Además, las pruebas incorporadas verifican las nuevas validaciones y la protección del estado interno del sistema, contribuyendo a mejorar la confiabilidad y mantenibilidad del código.
+`.\gradlew.bat clean test`
+
+```text
+BUILD SUCCESSFUL in 2s
+4 actionable tasks: 4 executed

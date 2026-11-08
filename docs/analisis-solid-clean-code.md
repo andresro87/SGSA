@@ -1,54 +1,48 @@
 # Análisis SOLID y Clean Code – SGSA
 
+**Materia:** Metodología de Sistemas II – UTN  
+**Integrantes:** Andrés Rodríguez , Francisco López
+
+---
+
 ## 1. Análisis de principios SOLID
 
-### SRP – Principio de responsabilidad única
+### SRP – Principio de Responsabilidad Única
+* **Estado Inicial:** `SistemaGestion` concentraba la administración de solicitudes, las validaciones de negocio, la generación de reportes y la persistencia JSON.
+* **Solución Aplicada:** Se separó la persistencia en `JsonSolicitudRepository`, se delegó a `Solicitud` la evaluación de sus transiciones de estado (`esTransicionValida`) y se extrajeron métodos de validación auxiliares.
 
-Se identifica una oportunidad de mejora en la clase `SistemaGestion`, que concentra la administración de solicitudes, las validaciones de negocio, la generación de reportes y la persistencia JSON.
+### OCP – Principio Abierto/Cerrado
+* **Estado Inicial:** Las reglas de transición de estado estaban dispersas en estructuras condicionales en `SistemaGestion`.
+* **Solución Aplicada:** Se encapsularon las reglas de transición dentro de `Solicitud.esTransicionValida()`, permitiendo modificar o extender las transiciones sin alterar la clase de gestión.
 
-Esta concentración dificulta el mantenimiento y aumenta el impacto de los cambios. Se propone separar la responsabilidad de persistencia de la lógica de gestión.
+### LSP – Principio de Sustitución de Liskov
+* **Estado Inicial:** No se registraban jerarquías de herencia complejas en la versión inicial.
+* **Solución Aplicada:** Se mantuvo el diseño simple garantizando que las entidades del dominio respeten los contratos de comportamiento previstos.
 
-### OCP – Principio abierto/cerrado
+### ISP – Principio de Segregación de Interfaces
+* **Estado Inicial:** Ausencia de interfaces infladas o innecesarias.
+* **Solución Aplicada:** Se conservó una arquitectura delgada enfocada en contratos claros de persistencia y dominio.
 
-La lógica de estados y tipos de solicitudes utiliza cadenas literales y condiciones distribuidas en diferentes métodos. Incorporar nuevos estados o modificar las reglas puede requerir cambios en varias partes del código.
+### DIP – Principio de Inversión de Dependencias
+* **Estado Inicial:** `SistemaGestion` instanciaba y dependía directamente del manejo concreto de la persistencia JSON.
+* **Solución Aplicada:** Se desacopló la lógica de gestión manteniendo una separación clara de responsabilidades con la capa de persistencia delegada.
 
-Se propone centralizar la representación de los estados y tipos mediante enumeraciones, reduciendo la dispersión de valores y condiciones.
+---
 
-### LSP – Principio de sustitución de Liskov
+## 2. Análisis y Criterios de Clean Code Aplicados
 
-En la versión inicial no se identifican jerarquías de herencia ni clases derivadas que permitan demostrar una infracción de este principio. Por lo tanto, no se registra un incumplimiento concreto.
+1. **Nombres Expresivos y Reveladores de Intención:** Métodos auxiliares descriptivos como `esTransicionValida()`, `esFinalizada()`, `validarTextoObligatorio()` y `calcularSiguienteId()`.
+2. **Métodos Pequeños y Enfocados:** Se redujo la extensión de `main()` en `Main.java` y de los métodos de `SistemaGestion.java` delegando sub-tareas a métodos privados.
+3. **Encapsulamiento del Estado Interno:** Se protegió la colección interna devolviendo copias inmutables mediante `List.copyOf(solicitudes)`.
+4. **Manejo Específico de Excepciones:** Se sustituyó la captura genérica `catch (Exception e)` en `Main.java` por excepciones específicas como `IllegalArgumentException` e `IllegalStateException`.
 
-### ISP – Principio de segregación de interfaces
+---
 
-El proyecto no utiliza interfaces con múltiples responsabilidades ni implementaciones que deban depender de métodos innecesarios. No se identifica una infracción concreta en esta versión.
+## 3. Decisiones de Mejora Consolidadas
 
-### DIP – Principio de inversión de dependencias
-
-La clase `SistemaGestion` depende directamente de implementaciones concretas de persistencia, como Gson y las clases de manejo de archivos. Esto vincula la lógica de gestión con una tecnología específica.
-
-Se propone evaluar la separación de la persistencia mediante una abstracción que permita desacoplar ambas responsabilidades.
-
-## 2. Análisis de Clean Code
-
-Se identifican las siguientes oportunidades de mejora:
-
-- **Legibilidad:** `Main.main()` concentra demasiadas operaciones y dificulta seguir el flujo de ejecución.
-- **Simplicidad:** algunos métodos realizan varias tareas que podrían separarse en operaciones más pequeñas.
-- **Nombres expresivos:** los valores representados mediante cadenas y números primitivos no comunican completamente su significado.
-- **Encapsulamiento:** `obtenerSolicitudes()` expone directamente la colección interna.
-- **Manejo de errores:** los bloques de persistencia utilizan excepciones genéricas y pueden ocultar problemas.
-- **Mantenibilidad:** las reglas de negocio y la persistencia están concentradas en una misma clase.
-
-## 3. Decisiones de mejora
-
-A partir del análisis se establece el siguiente criterio de trabajo:
-
-1. Separar la persistencia de la gestión de solicitudes.
-2. Reducir la extensión de los métodos mediante Extract Method.
-3. Reubicar responsabilidades en clases más adecuadas mediante Move Method.
-4. Agrupar los datos relacionados de registro mediante Introduce Parameter Object.
-5. Reemplazar cadenas literales de estados y tipos por enumeraciones.
-6. Mejorar el encapsulamiento de las colecciones.
-7. Fortalecer el manejo de excepciones.
-
-Los cambios se realizarán progresivamente y se verificarán mediante las pruebas automatizadas existentes, procurando conservar el comportamiento funcional del sistema.
+1. Separar formalmente la persistencia de la gestión de solicitudes.
+2. Reducir la extensión de los métodos mediante **Extract Method**.
+3. Reubicar responsabilidades en entidades del dominio mediante **Move Method**.
+4. Agrupar los datos relacionados de registro mediante **Introduce Parameter Object** (`DatosSolicitud`).
+5. Garantizar la inmutabilidad de la colección devuelta en `obtenerSolicitudes()`.
+6. Verificar cada modificación a través de la suite automatizada de JUnit 5.
