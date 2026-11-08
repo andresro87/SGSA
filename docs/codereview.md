@@ -76,16 +76,26 @@ La revisión se concentró en las clases `Main`, `SistemaGestion`, `JsonSolicitu
 
 ## 5. Verificación posterior a las correcciones
 
-Después de aplicar las correcciones se ejecutó:
+Después de aplicar las correcciones se ejecutó la suite completa de pruebas automatizadas mediante el siguiente comando:
 
-`.\gradlew.bat clean test`
+`.\gradlew.bat clean test --no-daemon`
 
 **Resultado:** BUILD SUCCESSFUL.
 
-Las 12 pruebas automatizadas finalizaron correctamente.
+El reporte de JUnit 5 confirmó los siguientes resultados:
+
+- Pruebas ejecutadas: 12.
+- Pruebas aprobadas: 12.
+- Pruebas fallidas: 0.
+- Errores: 0.
+- Pruebas omitidas: 0.
+
+Esto permitió comprobar que las correcciones realizadas no afectaron el comportamiento esperado de las funcionalidades cubiertas por las pruebas.
 
 ## 6. Resultado de la revisión
 
 Las dos observaciones seleccionadas para corrección inmediata fueron resueltas y verificadas mediante pruebas automatizadas.
 
-Las observaciones pendientes se registraron como oportunidades de mejora, ya que no forman parte
+Las observaciones pendientes se registraron como oportunidades de mejora, ya que no forman parte de los cambios realizados en esta etapa del proyecto. Se considera que abordarlas en una evolución futura permitiría fortalecer la encapsulación de las entidades y reducir el acoplamiento entre la lógica de negocio y la persistencia.
+
+En conclusión, la revisión permitió identificar problemas concretos, aplicar correcciones y dejar documentadas las mejoras pendientes, contribuyendo a una mayor calidad y mantenibilidad del sistema.

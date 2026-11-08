@@ -32,12 +32,24 @@ La suite `SistemaGestionTest` cuenta con 12 pruebas automatizadas que cubren las
 
 ---
 
-## 3. Resultado de la Ejecución
+## Resultado de ejecución
 
-Se ejecutó la suite completa mediante Gradle:
+Se ejecutó la suite completa de pruebas automatizadas mediante Gradle:
 
-`.\gradlew.bat clean test`
+`.\gradlew.bat clean test --no-daemon`
 
-```text
-BUILD SUCCESSFUL in 2s
-4 actionable tasks: 4 executed
+El resultado de la ejecución fue satisfactorio:
+
+- Pruebas ejecutadas: 12.
+- Pruebas aprobadas: 12.
+- Pruebas fallidas: 0.
+- Errores: 0.
+- Pruebas omitidas: 0.
+
+Gradle finalizó con el resultado `BUILD SUCCESSFUL`.
+
+La verificación se realizó mediante el reporte XML generado en:
+
+`build/test-results/test/TEST-ar.edu.utn.sgsa.SistemaGestionTest.xml`
+
+Esto confirma que las funcionalidades verificadas mantienen su comportamiento esperado y que las modificaciones introducidas no provocaron regresiones en los casos cubiertos por las pruebas.

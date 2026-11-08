@@ -71,4 +71,8 @@ El objetivo de este diagnóstico es identificar problemas de diseño y mantenimi
 
 ## 3. Conclusión del diagnóstico
 
-El diagnóstico permitió establecer la hoja de ruta de refactorización. Mediante la aplicación de patrones como **Move Method**, **Extract Method** e **Introduce Parameter Object**, junto con la inmutabilidad de listas (`List.copyOf`), se resolvieron los Code Smells detectados preservando la totalidad del comportamiento funcional.
+El diagnóstico permitió establecer una hoja de ruta para mejorar la calidad interna del sistema. A partir de los problemas identificados se aplicaron distintos refactorings, entre ellos **Move Method**, **Extract Method** e **Introduce Parameter Object**, además de mejoras en la protección de la colección de solicitudes mediante `List.copyOf()`.
+
+Como resultado, algunos Code Smells fueron resueltos, mientras que otros se mitigaron parcialmente o permanecen como oportunidades de mejora. Entre los problemas pendientes se encuentran el uso de cadenas literales para representar los estados, la utilización de tipos primitivos para conceptos del dominio y la configuración fija de la ubicación del archivo JSON.
+
+Esta distinción permite reflejar con mayor precisión la evolución del proyecto, evitando afirmar que todos los problemas fueron eliminados. Los aspectos pendientes quedan documentados para futuras mejoras, manteniendo como objetivo la calidad, la mantenibilidad y la preservación del comportamiento funcional del sistema.
