@@ -39,10 +39,8 @@ public class Main {
                 System.out.println(
                         "Error: debe ingresar un numero valido."
                 );
-            } catch (Exception e) {
-                System.out.println(
-                        "Error inesperado: " + e.getMessage()
-                );
+            } catch (IllegalArgumentException | IllegalStateException e) {
+                System.out.println("Error: " + e.getMessage());
             }
         }
 
@@ -92,7 +90,7 @@ public class Main {
         System.out.print("Tipo de solicitud: ");
         String tipo = scanner.nextLine();
 
-        System.out.print("Prioridad (1-Alta, 2-Media, 3-Baja): ");
+        System.out.print("Prioridad (1 a 5): ");
         int prioridad = Integer.parseInt(scanner.nextLine());
 
         System.out.print("Descripcion: ");
